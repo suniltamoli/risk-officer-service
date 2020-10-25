@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="false">
+    <!--To debug logging configuration, start Java with the -Dlogback.debug=true command line option.-->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <appender name="customRootLevelAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                    <pattern>yyyy-MM-dd HH:mm:ss.SSS ZZ</pattern>
+                </timestamp>
+                <pattern>
+                    <pattern>
+                        {
+                            "logLevel": "%p",
+                            "errorCode":"%mdc{errorCode}",
+                            "siteId": "${ENV}",
+                            "correlationId": "%mdc{correlationId}",
+                            "metric": "risk-officer",
+                            "totalProcessTime": "%mdc{totalProcessTime}",
+                            "error_response": "%mdc{error_response}",
+                            "additionalInfo": "%mdc{additionalInfo}",
+                            "messageReceivedOnConsumerTopic": "%mdc{messageReceivedOnConsumerTopic}",
+                            "messagePublishToResponseTopic": "%mdc{messagePublishToResponseTopic}",
+                            "messagePublishToDisbursementTopic": "%mdc{messagePublishToDisbursementTopic}",
+                            "thread": "%t{18}",
+                            "message": "%msg",
+                            "stack_trace": "%xEx"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
+
+    <if condition=' "${ENV}".equalsIgnoreCase("ENV_IS_UNDEFINED") || "${ENV}".equalsIgnoreCase("LOCAL")'>
+        <then>
+            <include resource="org/springframework/boot/logging/logback/base.xml"/>
+        </then>
+        <else>
+            <root level="info">
+                <appender-ref ref="customRootLevelAppender"/>
+            </root>
+        </else>
+    </if>
+
+</configuration>
